@@ -1,0 +1,25 @@
+---
+- name: Setting /etc/hosts file
+  hosts: kafka
+  tasks:
+    - name: setting kafka broker hosts
+      blockinfile:
+        path: /etc/hosts
+        block: |
+          172.31.27.133 kafka01
+          172.31.32.153 kafka02
+          172.31.48.244 kafka03
+        marker: "# {mark} Setting datalake hosts"
+      become: yes
+
+    - name: setting hostname
+      lineinfile:
+        path: /etc/hostname
+        regexp: '^(ip|kafka)'
+        line: '{{ inventory_hostname }}'
+      become: yes
+
+    - name: change timezone
+      command:
+        cmd: timedatectl set-timezone Asia/Seoul
+      become: yes

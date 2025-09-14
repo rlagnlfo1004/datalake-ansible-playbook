@@ -1,0 +1,63 @@
+---
+- name: install Confluent Kafka
+  hosts: kafka
+  tasks:
+    - name: Add Kafka group
+      ansible.builtin.group:
+        name: kafka
+        gid: 1001
+        system: false
+      become: yes
+
+    - name: Add Kafka user
+      ansible.builtin.user:
+        name: kafka
+        shell: /bin/bash
+        uid: 1001
+        group: kafka
+        groups: ubuntu
+        comment: User for Kafka Cluster
+      become: yes
+
+    - name: make directory
+      ansible.builtin.file:
+        path: /engine
+        state: directory
+      become: yes
+
+    - name: unarchive file
+      ansible.builtin.unarchive:
+        src: /home/ec2-user/downloads/confluent-community-6.2.14.tar.gz
+        dest: /engine
+        copy: true
+        owner: kafka
+        group: kafka
+      become: yes
+
+    - name: make data directory
+      ansible.builtin.file:
+        path: /data
+        state: directory
+      become: yes
+
+    - name: make data directory
+      ansible.builtin.file:
+        path: /src
+        state: directory
+      become: yes
+
+    - name: create log directory
+      become: yes
+      file:
+        path: /log
+        owner: kafka
+        group: kafka
+        state: directory
+
+    - name: make kafka segment directory
+      ansible.builtin.file:
+        path: /data/kafka-logs
+        state: directory
+        owner: kafka
+        group: kafka
+      become: yes

@@ -1,0 +1,50 @@
+---
+- name: create python env
+  hosts: kafka
+  tasks:
+    - name: install pkg for add repository
+      become: yes
+      apt:
+        pkg:
+          - software-properties-common
+        update_cache: true
+
+    - name: Add repo
+      become: yes
+      apt_repository:
+        repo: ppa:deadsnakes/ppa
+
+    - name: install python3.10, python3-pip, venv
+      become: true
+      apt:
+        pkg:
+          - python3.10
+          - python3-pip
+          - python3.10-venv
+        update_cache: true
+
+    - name: create python virtual environment
+      become: true
+      command:
+        cmd: python3.10 -m venv /src/kafka_venv
+        creates: /src/kafka_venv
+
+    - name: change owner to kafka
+      become: true
+      file:
+        path: /src/kafka_venv
+        owner: kafka
+        group: kafka
+        recurse: yes
+
+    - name: Modify .bashrc
+      blockinfile:
+        path: /home/kafka/.bashrc
+        block: |
+          source /src/kafka_venv/bin/activate
+          export PYTHONPATH="${PYTHONPATH}:/src/kafka-producer"
+          alias src="cd /src"
+          alias bin="cd /engine/confluent-6.2.14/bin"
+          alias logs="cd /engine/confluent-6.2.14/logs"
+        marker: "# {mark} Setting bashrc"
+      become: yes
