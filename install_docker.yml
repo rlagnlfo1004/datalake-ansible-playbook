@@ -1,0 +1,54 @@
+---
+- name: install Docker Engine
+  hosts: kafka
+  tasks:
+    - name: Install base libraries
+      apt:
+        pkg:
+          - ca-certificates
+          - curl
+        update_cache: true
+      become: yes
+
+    - name: mkdir keyring directory
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: 0755
+      become: yes
+
+    - name: Download gpg key
+      uri:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings
+      become: yes
+
+    - name: Copy file
+      copy:
+        remote_src: yes
+        src: /etc/apt/keyrings/gpg
+        dest: /etc/apt/keyrings/docker.asc
+      become: yes
+
+    - name: Delete Original File
+      file:
+        path: /etc/apt/keyrings/gpg
+        state: absent
+      become: yes
+
+    - name: Add the repository to Apt sources
+      shell: |
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" > /etc/apt/sources.list.d/docker.list
+      become: yes
+
+    - name: Install Docker libraries
+      apt:
+        pkg:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        update_cache: true
+      become: yes
+
