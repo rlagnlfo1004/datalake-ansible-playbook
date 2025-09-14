@@ -1,0 +1,38 @@
+---
+- name: Register kafka service as a daemon
+  hosts: kafka
+  tasks:
+    - name: kafka.service file
+      blockinfile:
+        path: /etc/systemd/system/kafka.service
+        create: yes
+        block: |
+          [Unit]
+          Description=Kafka Service
+          After=network.target zookeeper.service
+          
+          [Service]
+          Type=simple
+          WorkingDirectory=/engine/confluent-6.2.14
+          ExecStart=/engine/confluent-6.2.14/bin/kafka-server-start /engine/confluent-6.2.14/etc/kafka/server.properties
+          ExecStop=/engine/confluent-6.2.14/bin/kafka-server-stop
+          User=kafka
+          Group=kafka
+          Restart=always
+          
+          [Install]
+          WantedBy=multi-user.target
+        marker: "# {mark} Kafka Service"
+      become: yes
+    - name: daemon-reload
+      systemd_service:
+        daemon_reload: true
+      become: yes
+    - name: Start kafka service
+      systemd_service:
+        state: started
+        name: kafka
+        enabled: true
+      become: yes
+      tags:
+        - start

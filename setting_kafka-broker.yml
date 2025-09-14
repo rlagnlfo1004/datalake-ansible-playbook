@@ -1,0 +1,16 @@
+---
+- name: Setting Kafka Broker
+  hosts: kafka
+  tasks:
+    - name: setting kafka server.properties
+      lineinfile:
+        path: /engine/confluent-6.2.14/etc/kafka/server.properties
+        regexp: '{{ item.regexp }}'
+        line: '{{ item.line }}'
+      loop:
+        - { regexp: '^broker\.id', line: 'broker.id={{ kafka_broker_no }}' }
+        - { regexp: '^log\.dirs', line: 'log.dirs=/data/kafka-logs' }
+        - { regexp: '^zookeeper\.connect', line: 'zookeeper.connect=kafka01:2181,kafka02:2181,kafka03:2181' }
+        - { regexp: '^default\.replication\.factor', line: 'default.replication.factor=3' }
+        - { regexp: '^[#]*advertised\.listeners', line: 'advertised.listeners=PLAINTEXT://{{ inventory_hostname }}:9092' }
+      become: yes

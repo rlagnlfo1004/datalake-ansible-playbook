@@ -22,7 +22,7 @@
         url: 'https://aws-codedeploy-ap-northeast-2.s3.ap-northeast-2.amazonaws.com/latest/install'
         dest: /src/code-deploy
 
-    - name: add execute privilege                 # 실행 권한 추가
+    - name: add execute privilege                 # 실행 권한 추가 
       file:
         path: /src/code-deploy/install
         state: file
