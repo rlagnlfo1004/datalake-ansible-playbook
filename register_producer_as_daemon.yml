@@ -1,0 +1,39 @@
+---
+- name: Register Producer as a daemon
+  hosts: kafka01
+  tasks:
+    - name: bicycle-producer.service file
+      blockinfile:
+        path: /etc/systemd/system/bicycle-producer.service
+        create: yes
+        block: |
+          [Unit]
+          Description=Bicycle Producer Service
+          After=network.target docker.service kafka.service
+
+          [Service]
+          Type=simple
+          Environment=PYTHONPATH=/src/kafka-producer
+          ExecStart=/src/kafka_venv/bin/python /src/kafka-producer/producers/bicycle_producer.py
+          User=kafka
+          Group=kafka
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+        marker: "# {mark} Kafka UI Service"
+      become: yes
+
+    - name: daemon-reload
+      systemd_service:
+        daemon_reload: yes
+      become: yes
+
+    - name: Start Bicycle Producer Service
+      systemd_service:
+        state: started
+        name: bicycle-producer
+        enabled: true
+      become: yes
+      tags:
+        - start
