@@ -1,0 +1,15 @@
+---
+- name: create directory for prometheus and grafana
+  hosts: kafka03
+  tasks:
+    - name: mkdir data directory
+      file:
+        name: "{{ item }}"
+        state: directory
+        owner: kafka
+        group: kafka
+        mode: 0755
+      loop:
+        - /data/prometheus/data
+        - /data/grafana/data
+      become: yes
